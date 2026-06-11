@@ -1,1 +1,528 @@
-under construction.
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="DF-ExpEnse is a principled exploration technique for improving sample-efficient finetuning of pretrained generative control policies.">
+  <meta name="keywords" content="DF-ExpEnse, Exploration, Reinforcement Learning, Fleet Learning, Robotic Fleets, Online Experience">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diffusion Filtered Exploration via Ensembles</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <!-- Favicon-->
+  <link rel="icon" href="./static/images/dfexpense_icon.jpg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">DF-ExpEnse: Diffusion Filtered Exploration for Sample Efficient Finetuning</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://calvinyluo.com">Calvin Luo</a><sup>1,2</sup>,</span>
+            <span class="author-block">
+              <a href="https://chensun.me">Chen Sun</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://shurans.github.io">Shuran Song</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Stanford University, <sup>2</sup>Brown University
+            <br>ICML 2026</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper (Coming Soon!)</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://arxiv.org/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv (Coming Soon!)</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/calvinluo/df-expense"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (Coming Soon!)</span>
+                  </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section abstract">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Diffusion Policies in the Age of Exploration <span class="flipped-emoji">🔭</span> ⋆˚࿔</h2>
+        <div class="content has-text-justified">
+          <p>
+          Diffusion policies can learn powerful multimodal decision-making models from <i>offline experience</i>, and strategies have been devised for finetuning them with respect to <i>online experience</i>.  But as real-world interactions can be expensive, we look to reduce collection <i>quantity</I> for increased experience <i>quality</i> through <b>exploration</b>, to improve behavior in a <i>sample-efficient</i> way.  We focus on three central questions in equipping diffusion policies for principled online exploration:
+          <ul>🔍 How can we <b>identify</b> reasonable actions worth exploring amongst a continuous action space?</ul>
+          <ul>⚖️ How can we <b>quantify</b> the exploration interest an agent has for an arbitrary action?</ul>
+          <ul>🤝 How can we <b>collaborate</b> between agents in a fleet to perform exploration as a group?</ul>
+          We present <b><u>D</u>iffusion <u>F</u>iltered <u>Exp</u>loration via <u>Ense</u>mbles (DF-ExpEnse)</b>, an exploration technique that improves the quality of online experience collection, thus increasing finetuning sample-efficiency.  DF-ExpEnse leverages the multimodal modeling capabilities of the diffusion policy to <i>identify</i> an expressive and tractably evaluatable candidate set.  It utilizes an ensemble of critics to <i>quantifiably</i> score each action, to select the one that best balances execution quality with exploration interest.  DF-ExpEnse further enables cross-agent communication to facilitate <i>collaborative</i> exploration as a group.
+          <br>
+          <br>
+          <b>Exploration can come for free!</b> DF-ExpEnse requires <i>no extra components</i> beyond ones commonly found in reinforcement learning finetuning, simply reusing them during online inference for principled exploration!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="is-centered has-text-centered">
+      <h2 class="title is-3">DF-ExpEnse Framework</h2>
+      <video poster="" id="ps_iteration_2" autoplay loop muted playsinline height="100%">
+        <source src="./static/videos/df-expense.mp4" type="video/mp4">
+      </video>
+
+      <div class="content has-text-justified">
+        <p></p>
+        <p>
+        At each timestep, DF-ExpEnse selects an exploratory action to execute by performing three steps.  First, <b>(a)</b> filters the continuous action space by generating multiple samples from the diffusion policy.  Then, <b>(b)</b> estimates exploration interest in each action with respect to quality and uncertainty using an ensemble.  Lastly, <b>(c)</b> normalizes exploration interest across the fleet and selects the action with the maximum interest to execute.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="is-centered has-text-centered">
+      <h2 class="title is-3">Experiments</h2>
+      <div class="content has-text-justified">
+        <p>
+        DF-ExpEnse is a <i>general</i> exploration technique, and can be seamlessly integrated with existing strategies that finetune pretrained diffusion policies via reinforcement learning to provide sample-efficiency benefits.  We integrate DF-ExpEnse with input noise and residual finetuning, and evaluate on a variety of manipulation and locomotion tasks across Robomimic, Gym, and DexMimicGen.
+        </p>
+      </div>
+    </div>
+
+    <section class="hero is-light is-small">
+      <div class="hero-body">
+        <div class="container">
+          <h2 class="subtitle-4by4 title center-title is-size-5 robomimic-carousel-title">Robomimic Tasks</h2>
+
+          <div class="column is-11 comparison-carousel-column">
+            <div id="results-carousel" class="results-carousel comparison-carousel">
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/square.png" alt="Robomimic Square Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla DSRL</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/square/dsrl.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 512,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~70%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/square/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 512,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~50%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/square/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 512,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~90%</h3>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/can.png" alt="Robomimic Can Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla DSRL</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/can/dsrl.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~60%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/can/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~40%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/can/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~90%</h3>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/lift.png" alt="Robomimic Lift Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla DSRL</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/lift/dsrl.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~100%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/lift/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~100%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/lift/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 480,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~100%</h3>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/tool_hang.png" alt="Robomimic Tool Hang Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla DSRL</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/tool_hang/dsrl.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 2,048,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~45%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/tool_hang/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 2,048,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~45%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/robomimic/tool_hang/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 2,048,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~60%</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero is-light is-small">
+      <div class="hero-body">
+        <div class="container">
+          <h2 class="subtitle-4by4 title center-title is-size-5 robomimic-carousel-title">DexMimicGen Tasks</h2>
+
+          <div class="column is-11 comparison-carousel-column">
+            <div id="results-carousel" class="results-carousel comparison-carousel">
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/dexmg_box.png" alt="DexMimicGen Box Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla ResFiT</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/box_clean/resfit.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~40%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/box_clean/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~50%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/box_clean/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~80%</h3>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/dexmg_coffee.png" alt="DexMimicGen Coffee Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla ResFiT</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/coffee/resfit.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~10%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/coffee/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~40%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/coffee/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~60%</h3>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="comparison-slide">
+                <div class="comparison-graph-row figure-container">
+                  <figure class="figure">
+                    <img src="./static/images/dexmg_can.png" alt="DexMimicGen Can Performance Comparison">
+                  </figure>
+                </div>
+
+                <div class="comparison-video-row">
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Vanilla ResFiT</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/can_sort/resfit.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~60%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header">Max-Q</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/can_sort/max_q.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle prompt">Success Rate: ~80%</h3>
+                    </div>
+                  </div>
+
+                  <div class="comparison-video-card has-text-centered">
+                    <h3 class="subtitle header featured-method">DF-ExpEnse</h3>
+                    <video poster="" autoplay controls muted loop playsinline>
+                      <source src="./static/videos/dexmimicgen/can_sort/dfexpense.mp4" type="video/mp4">
+                    </video>
+                    <div class="has-text-centered comparison-video-caption">
+                      <h3 class="subtitle prompt">Timestep: 50,000</h3>
+                      <h3 class="subtitle type">Success Rate: ~90%</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero is-light is-small">
+      <div class="hero-body">
+        <div class="container">
+          <h2 class="subtitle-4by4 title center-title is-size-5">Fleet Size Ablations</h2>
+          <div class="content has-text-justified">
+            <p>
+            Intuitively, larger fleets may provide greater amounts of normalization and collaboration possibilities.  We find that performance does decrease below a fleet size of 4, verifying that DF-ExpEnse can leverage larger fleet sizes to help improve sample efficiency.  Nevertheless, DF-ExpEnse still reliably outperforms vanilla DSRL and Max-Q across all fleet sizes, large and small.
+            <br>
+            <br>
+            These findings further reinforce DF-ExpEnse as a robust method that can be integrated with standard reinforcement learning finetuning techniques to provide consistent sample efficiency benefits across a variety of available resource settings.
+            </p>
+          </div>
+          <div class="figure-container">
+            <figure class="figure">
+                <img class="beveled-graph" src="./static/images/fleetsize_can.png" alt="fleetsize_comparison">
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{
+      luo2026dfexpense,
+      title={{DF}-ExpEnse: Diffusion Filtered Exploration for Sample Efficient Finetuning},
+      author={Calvin Luo and Chen Sun and Shuran Song},
+      booktitle={Forty-third International Conference on Machine Learning},
+      year={2026}
+    }</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <!--div class="container"-->
+    <div class="content has-text-centered">
+    </div>
+    <div class="columns is-centered">
+      <!-- <div class="column is-8"> -->
+        <div class="content">
+          <p>
+            This website licensed under a <a rel="license"
+            href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a> and is based on this  <a
+            href="https://github.com/nerfies/nerfies.github.io">source code</a>.
+          </p>
+        </div>
+      <!-- </div> -->
+    </div>
+  <!--/div-->
+</footer>
+
+</body>
+</html>
